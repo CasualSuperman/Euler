@@ -3,12 +3,13 @@ package BitSlice
 import "sync"
 
 type BitSlice struct {
-	arr   []byte
+	Arr   []byte
 	locks []sync.RWMutex
 	len   uint
 }
 
-func New(length uint) BitSlice {
+func New(length uint) *BitSlice {
+	slice := new(BitSlice)
 	byteLen := length / 8
 	if length%8 > 0 {
 		byteLen++
@@ -19,17 +20,10 @@ func New(length uint) BitSlice {
 		lockLen++
 	}
 
-	return BitSlice{make([]byte, byteLen),
-		make([]sync.RWMutex, lockLen),
-		length}
-}
-
-func Quick(data []byte) BitSlice {
-	lockLen := len(data) / 8
-	if len(data)%8 > 0 {
-		lockLen++
-	}
-	return BitSlice{data, make([]sync.RWMutex, lockLen), uint(len(data))}
+	slice.Arr = make([]byte, byteLen)
+	slice.locks = make([]sync.RWMutex, lockLen)
+	slice.len = length
+	return slice
 }
 
 /* Helper Methods */
@@ -61,7 +55,7 @@ func (b BitSlice) Value(index uint) bool {
 	}()
 
 	b.locks[lIndex].RLock()
-	return (b.arr[bIndex] & mask) != 0
+	return (b.Arr[bIndex] & mask) != 0
 }
 
 func (b BitSlice) SetValue(index uint, value bool) {
@@ -71,9 +65,9 @@ func (b BitSlice) SetValue(index uint, value bool) {
 	b.locks[lIndex].Lock()
 
 	if !value {
-		b.arr[bIndex] &= ^mask // Example: ANDed with 11111011
+		b.Arr[bIndex] &= ^mask // Example: ANDed with 11111011
 	} else {
-		b.arr[bIndex] |= mask // Example: ORed with 00010000
+		b.Arr[bIndex] |= mask // Example: ORed with 00010000
 	}
 
 	b.locks[lIndex].Unlock()
@@ -85,7 +79,7 @@ func (b BitSlice) FlipValue(index uint) {
 	bIndex, lIndex, mask := getIndexMask(index)
 	b.locks[lIndex].Lock()
 
-	b.arr[bIndex] ^= mask
+	b.Arr[bIndex] ^= mask
 
 	b.locks[lIndex].Unlock()
 }
