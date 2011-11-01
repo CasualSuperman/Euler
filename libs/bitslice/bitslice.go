@@ -11,7 +11,7 @@ type BitSlice struct {
 func New(length uint) BitSlice {
 	byteLen := length / 8
 	if length%8 > 0 {
-		newLen++
+		byteLen++
 	}
 
 	lockLen := byteLen / 8
@@ -22,6 +22,14 @@ func New(length uint) BitSlice {
 	return BitSlice{make([]byte, byteLen),
 		make([]sync.RWMutex, lockLen),
 		length}
+}
+
+func Quick(data []byte) BitSlice {
+	lockLen := len(data) / 8
+	if len(data)%8 > 0 {
+		lockLen++
+	}
+	return BitSlice{data, make([]sync.RWMutex, lockLen), uint(len(data))}
 }
 
 /* Helper Methods */
@@ -53,7 +61,7 @@ func (b BitSlice) Value(index uint) bool {
 	}()
 
 	b.locks[lIndex].RLock()
-	return (b.arr[index] & mask) != 0
+	return (b.arr[bIndex] & mask) != 0
 }
 
 func (b BitSlice) SetValue(index uint, value bool) {
@@ -63,9 +71,9 @@ func (b BitSlice) SetValue(index uint, value bool) {
 	b.locks[lIndex].Lock()
 
 	if !value {
-		b.arr[index] &= ^mask // Example: ANDed with 11111011
+		b.arr[bIndex] &= ^mask // Example: ANDed with 11111011
 	} else {
-		b.arr[index] |= mask // Example: ORed with 00010000
+		b.arr[bIndex] |= mask // Example: ORed with 00010000
 	}
 
 	b.locks[lIndex].Unlock()
@@ -77,7 +85,7 @@ func (b BitSlice) FlipValue(index uint) {
 	bIndex, lIndex, mask := getIndexMask(index)
 	b.locks[lIndex].Lock()
 
-	b.arr[index] ^= mask
+	b.arr[bIndex] ^= mask
 
 	b.locks[lIndex].Unlock()
 }
