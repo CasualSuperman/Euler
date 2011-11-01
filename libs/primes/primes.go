@@ -1,14 +1,14 @@
 package primes
 
-import . "../bitslice/bitslice"
+import bs "../bitslice/bitslice"
 
-func Primes(limit uint) BitSlice {
-	length := limit / 8
+func Primes(limit uint) *bs.BitSlice {
+	length := int(limit / 8)
 	if limit%8 > 0 {
 		length++
 	}
 
-	list := make([]byte, length)
+	list := make([]byte, uint(length))
 
 	// Initialize for values 2, 3, 5, and 7 already run.
 	// 0123456789 10 11 12 13 14 15 16 17...
@@ -31,5 +31,7 @@ func Primes(limit uint) BitSlice {
 	//     I^2 are final.
 	// Our array has been initialized for i = 7
 	var bigGPrime uint  = 49
-	var primes = Quick(list)
+	primes := bs.New(limit)
+	primes.Arr = list
+	return primes
 }
