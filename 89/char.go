@@ -16,22 +16,20 @@ var (
 )
 
 func NewChar(letter uint8) char {
-	result := char{letter, -1}
+	// Map from letter to value
+	vals :=  map[byte] int {
+		'M': 1000,
+		'D':  500,
+		'C':  100,
+		'L':   50,
+		'X':   10,
+		'V':    5,
+		'I':    1}
+
+	result := char{letter, 0x111E6A1} // Illegal
 	switch letter {
-		case 'M':
-			result.value = 1000
-		case 'D':
-			result.value = 500
-		case 'C':
-			result.value = 100
-		case 'L':
-			result.value = 50
-		case 'X':
-			result.value = 10
-		case 'V':
-			result.value = 5
-		case 'I':
-			result.value = 1
+		case 'M','D','C','L','X','V','I':
+			result.value = vals[letter]
 		default:
 			panic("Invalid letter.")
 	}
