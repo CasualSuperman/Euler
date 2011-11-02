@@ -8,11 +8,11 @@ import (
 )
 
 func TestPrimes(t *testing.T) {
-	var limit int = 10000
+	var limit int = 104729
 
 	fmt.Println("Reading in results.")
 	file, _ := os.Open("10000.txt")
-	list := make([]uint, 0)
+	list := make(map[uint]bool)
 	char := []byte{}
 	eof := false
 	for !eof {
@@ -22,7 +22,7 @@ func TestPrimes(t *testing.T) {
 			eof = true
 		} else if string(single) == " " {
 			num, _ := strconv.Atoui(string(char))
-			list = append(list, num)
+			list[num] = true
 			char = []byte{}
 		} else {
 			char = append(char, single...)
@@ -34,15 +34,9 @@ func TestPrimes(t *testing.T) {
 
 	fmt.Println("Comparing results.")
 	for i := 0; i < limit; i++ {
-		found := false
-		for a := 0; a < len(list) && !found; a++ {
-			if list[a] == uint(i) {
-				found = true
-			}
-		}
-		if found != result.Value(uint(i)) {
+		if list[uint(i)] != result.Value(uint(i)) {
 			t.Error("WRONG")
-			if found {
+			if list[uint(i)] {
 				fmt.Printf("Program incorrectly reported that %v is composite.\n", i)
 			} else {
 				fmt.Printf("Program incorrectly determined that %v is prime.\n", i)
