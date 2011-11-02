@@ -5,16 +5,6 @@ type char struct {
 	value  int
 }
 
-var (
-	M = char{'M', 1000}
-	D = char{'D',  500}
-	C = char{'C',  100}
-	L = char{'L',   50}
-	X = char{'X',   10}
-	V = char{'V',    5}
-	I = char{'I',    1}
-)
-
 func NewChar(letter uint8) char {
 	// Map from letter to value
 	vals :=  map[byte] int {
