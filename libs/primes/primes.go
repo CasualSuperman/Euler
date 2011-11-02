@@ -3,9 +3,10 @@ package primes
 import (
 	bs "../bitslice/bitslice"
 	// "fmt"
+	"runtime"
 )
 
-const MAX_CONCURRENT = 2
+const MAX_CONCURRENT = 3
 
 func Primes(limit uint) *bs.BitSlice {
 	length := int(limit / 8)
@@ -32,7 +33,9 @@ func Primes(limit uint) *bs.BitSlice {
 
 	primes := bs.New(limit)
 	primes.Arr = list
+	runtime.GOMAXPROCS(MAX_CONCURRENT)
 	generate(primes, limit)
+	runtime.GOMAXPROCS(1)
 	return primes
 }
 
