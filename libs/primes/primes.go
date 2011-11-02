@@ -39,6 +39,20 @@ func Primes(limit uint) *bs.BitSlice {
 	return primes
 }
 
+var alt = false
+
+func increment(i uint) uint {
+	switch {
+		case alt:
+			i += 2
+			fallthrough
+		default:
+			i += 2
+	}
+	alt = !alt
+	return i
+}
+
 func generate(primes *bs.BitSlice, limit uint) {
 	// biggestGuaranteedPrime
 	// The largest number guaranteed to be determined at this point.
@@ -62,13 +76,13 @@ func generate(primes *bs.BitSlice, limit uint) {
 				if lastGen < bigGPrime {
 					break
 				}
-				lastGen += 2 // Skip multiples of 2
+				lastGen = increment(lastGen)
 			}
 			// If we didn't go too far, we found a prime that needs sieving
 			if lastGen < bigGPrime {
 				generating[lastGen] = true
 				go run(primes, lastGen, limit, done)
-				lastGen += 2
+				lastGen = increment(lastGen)
 			}
 		}
 		// If we're stuck, either due to surpassing our max threads or
