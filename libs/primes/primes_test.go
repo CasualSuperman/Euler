@@ -8,10 +8,10 @@ import (
 )
 
 func TestPrimes(t *testing.T) {
-	var limit int = 91
+	var limit int = 10000
 
 	fmt.Println("Reading in results.")
-	file, _ := os.Open("1000.txt")
+	file, _ := os.Open("10000.txt")
 	list := make([]uint, 0)
 	char := []byte{}
 	eof := false

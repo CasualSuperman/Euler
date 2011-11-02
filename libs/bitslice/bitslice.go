@@ -28,7 +28,7 @@ func New(length uint) *BitSlice {
 
 /* Helper Methods */
 func (b BitSlice) checkBounds(index uint) {
-	if index >= b.len {
+	if index > b.len {
 		panic("Index out of range.")
 	}
 }

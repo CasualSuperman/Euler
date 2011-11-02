@@ -2,10 +2,10 @@ package primes
 
 import (
 	bs "../bitslice/bitslice"
-	"math"
+	// "fmt"
 )
 
-const MAX_CONCURRENT = 4
+const MAX_CONCURRENT = 2
 
 func Primes(limit uint) *bs.BitSlice {
 	length := int(limit / 8)
@@ -47,12 +47,10 @@ func generate(primes *bs.BitSlice, limit uint) {
 	// The last number set to run
 	var lastGen uint = 5
 
-	var sqrt = uint(math.Sqrt(float64(limit))) + 1
-
 	var generating = make(map[uint]bool, MAX_CONCURRENT)
 	var done = make(chan uint)
 	// Loop until we reach the end.
-	for bigGPrime < sqrt {
+	for bigGPrime <= limit {
 		// Launch sieves
 		for len(generating) < MAX_CONCURRENT && lastGen < bigGPrime {
 			// Skip values that aren't prime
@@ -61,42 +59,45 @@ func generate(primes *bs.BitSlice, limit uint) {
 				if lastGen < bigGPrime {
 					break
 				}
-				lastGen += 6 // Skip multiples of 2 and 3
+				lastGen += 2 // Skip multiples of 2
 			}
-			// If we didn't go too far, we find a prime that needs sieving
+			// If we didn't go too far, we found a prime that needs sieving
 			if lastGen <= bigGPrime {
 				generating[lastGen] = true
 				go run(primes, lastGen, limit, done)
+				lastGen += 2
 			}
 		}
 		// If we're stuck, either due to surpassing our max threads or
 		// passing our biggest known value
 		if len(generating) >= MAX_CONCURRENT || lastGen >= bigGPrime {
-			// wait.
-			val := <-done
-			generating[val] = false, false // Remove it from the list
+			generating[<-done] = false, false // Remove it from the list
 
 			// Find the new largest known value (This might not change)
-			smallest := limit
+			smallest := bigGPrime
 			for val, _ := range generating {
 				if val < smallest {
 					smallest = val
 				}
 			}
-			bigGPrime = uint(smallest * smallest) - 1
+			bigGPrime = uint(smallest*smallest) - 1
+			// fmt.Printf("New bigGPrime is %v.\n", bigGPrime)
 		}
 		// Repeat
+	}
+	for len(generating) > 0 {
+		generating[<-done] = false, false
 	}
 }
 
 func run(slice *bs.BitSlice, val, max uint, done chan uint) {
+	// fmt.Printf("Launching sieve of %v.\n", val)
 	start := val
-	val = start * (start - 1)
-	for val <= max {
+	val = start * start
+	for val < max {
+		// fmt.Printf("Sieve of %v reached val %v.\n", start, val)
+		slice.SetValue(val, false)
 		val += start
-		if slice.Value(val) {
-			slice.SetValue(val, false)
-		}
 	}
 	done <- start
 }
