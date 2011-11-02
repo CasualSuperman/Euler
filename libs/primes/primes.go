@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-const MAX_CONCURRENT = 3
+const MAX_CONCURRENT = 1
 
 func Primes(limit uint) *bs.BitSlice {
 	length := int(limit / 8)
@@ -55,11 +55,11 @@ func generate(primes *bs.BitSlice, limit uint) {
 	// Loop until we reach the end.
 	for bigGPrime <= limit {
 		// Launch sieves
-		for len(generating) < MAX_CONCURRENT && lastGen < bigGPrime {
+		for len(generating) < MAX_CONCURRENT && lastGen <= bigGPrime {
 			// Skip values that aren't prime
 			for !primes.Value(lastGen) {
 				// Stop if we go too far
-				if lastGen < bigGPrime {
+				if lastGen <= bigGPrime {
 					break
 				}
 				lastGen += 2 // Skip multiples of 2
@@ -73,11 +73,12 @@ func generate(primes *bs.BitSlice, limit uint) {
 		}
 		// If we're stuck, either due to surpassing our max threads or
 		// passing our biggest known value
-		if len(generating) >= MAX_CONCURRENT || lastGen >= bigGPrime {
-			generating[<-done] = false, false // Remove it from the list
+		if len(generating) >= MAX_CONCURRENT || lastGen > bigGPrime {
+			mostRecent := <-done
+			generating[mostRecent] = false, false // Remove it from the list
 
 			// Find the new largest known value (This might not change)
-			smallest := bigGPrime
+			smallest := mostRecent
 			for val, _ := range generating {
 				if val < smallest {
 					smallest = val
