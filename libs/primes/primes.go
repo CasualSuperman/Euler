@@ -60,11 +60,12 @@ func generate(primes *bs.BitSlice, limit uint) {
 	//     sieve of eratosthenes for number I, all values less than
 	//     I^2 are final.
 	// Our array has been initialized for i = 5
-	var bigGPrime uint = 24
+	var bigGPrime uint = 25
 	// The last number set to run
 	var lastGen uint = 5
 
 	var generating = make(map[uint]bool, MAX_CONCURRENT)
+	var generated  = make(map[uint]bool)
 	var done = make(chan uint)
 	// Loop until we reach the end.
 	for bigGPrime <= limit {
@@ -72,8 +73,9 @@ func generate(primes *bs.BitSlice, limit uint) {
 		for len(generating) < MAX_CONCURRENT && lastGen <= bigGPrime {
 			// Skip values that aren't prime
 			for !primes.Value(lastGen) {
+				//fmt.Printf("Checking %v\n", lastGen)
 				// Stop if we go too far
-				if lastGen <= bigGPrime {
+				if lastGen > bigGPrime {
 					break
 				}
 				lastGen = increment(lastGen)
@@ -81,6 +83,7 @@ func generate(primes *bs.BitSlice, limit uint) {
 			// If we didn't go too far, we found a prime that needs sieving
 			if lastGen <= bigGPrime {
 				generating[lastGen] = true
+				//fmt.Printf("Number of runs still out: %v\n", len(generating))
 				go run(primes, lastGen, limit, done)
 				lastGen = increment(lastGen)
 			}
@@ -90,15 +93,26 @@ func generate(primes *bs.BitSlice, limit uint) {
 		if len(generating) >= MAX_CONCURRENT || lastGen > bigGPrime {
 			mostRecent := <-done
 			generating[mostRecent] = false, false // Remove it from the list
-
+			generated[mostRecent] = true
 			// Find the new largest known value (This might not change)
-			smallest := mostRecent
-			for val, _ := range generating {
-				if val < smallest {
-					smallest = val
+			if len(generating) == 0 {
+				biggest := uint(0)
+				for val, _ := range generated {
+					if val > biggest {
+						biggest = val
+					}
 				}
+				bigGPrime = uint(biggest*biggest)
+			} else {
+				smallest := mostRecent
+				for val, _ := range generating {
+					if val < smallest {
+						//fmt.Printf("New smallest routine out: %v\n", val)
+						smallest = val
+					}
+				}
+				bigGPrime = uint(smallest*smallest)
 			}
-			bigGPrime = uint(smallest*smallest) - 1
 			// fmt.Printf("New bigGPrime is %v.\n", bigGPrime)
 		}
 		// Repeat
@@ -109,7 +123,7 @@ func generate(primes *bs.BitSlice, limit uint) {
 }
 
 func run(slice *bs.BitSlice, val, max uint, done chan uint) {
-	// fmt.Printf("Launching sieve of %v.\n", val)
+	//fmt.Printf("Launching sieve of %v.\n", val)
 	start := val
 	val = start * start
 	for val < max {
