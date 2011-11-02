@@ -17,10 +17,9 @@ func NewChar(letter uint8) char {
 		'I':    1}
 
 	result := char{letter, 0x111E6A1} // Illegal
-	switch letter {
-		case 'M','D','C','L','X','V','I':
-			result.value = vals[letter]
-		default:
+	if val, valid := vals[letter]; valid {
+			result.value = val
+	} else {
 			panic("Invalid letter.")
 	}
 	return result
