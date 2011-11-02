@@ -8,7 +8,7 @@ import (
 )
 
 func TestPrimes(t *testing.T) {
-	var limit int = 104729
+	var limit int = 1047
 
 	fmt.Println("Reading in results.")
 	file, _ := os.Open("10000.txt")
@@ -46,6 +46,6 @@ func TestPrimes(t *testing.T) {
 
 func BenchmarkPrimes(b *testing.B) {
 	for i:= 0; i < b.N; i++ {
-		Primes(100000)
+		Primes(10000000)
 	}
 }
