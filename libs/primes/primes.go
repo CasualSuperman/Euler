@@ -2,7 +2,7 @@ package primes
 
 import (
 	bs "../bitslice/bitslice"
-	// "fmt"
+	//"fmt"
 	"runtime"
 )
 
