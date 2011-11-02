@@ -15,8 +15,8 @@ func New(length uint) *BitSlice {
 		byteLen++
 	}
 
-	lockLen := byteLen / 8
-	if byteLen%8 > 0 {
+	lockLen := byteLen / 64
+	if byteLen%64 > 0 {
 		lockLen++
 	}
 
@@ -35,7 +35,7 @@ func (b BitSlice) checkBounds(index uint) {
 
 func getIndexMask(i uint) (byteIndex, lockIndex uint, mask byte) {
 	byteIndex = i / 8
-	lockIndex = byteIndex / 8
+	lockIndex = byteIndex / 64
 	mask = 0x01 << (7 - (i % 8))
 	return
 }

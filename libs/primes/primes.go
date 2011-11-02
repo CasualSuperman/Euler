@@ -2,6 +2,7 @@ package primes
 
 import (
 	bs "../bitslice/bitslice"
+	"math"
 )
 
 const MAX_CONCURRENT = 4
@@ -42,14 +43,16 @@ func generate(primes *bs.BitSlice, limit uint) {
 	//     sieve of eratosthenes for number I, all values less than
 	//     I^2 are final.
 	// Our array has been initialized for i = 5
-	var bigGPrime uint = 25
+	var bigGPrime uint = 24
 	// The last number set to run
-	var lastGen uint = 7
+	var lastGen uint = 5
+
+	var sqrt = uint(math.Sqrt(float64(limit))) + 1
 
 	var generating = make(map[uint]bool, MAX_CONCURRENT)
 	var done = make(chan uint)
 	// Loop until we reach the end.
-	for bigGPrime < limit {
+	for bigGPrime < sqrt {
 		// Launch sieves
 		for len(generating) < MAX_CONCURRENT && lastGen < bigGPrime {
 			// Skip values that aren't prime
@@ -88,7 +91,7 @@ func generate(primes *bs.BitSlice, limit uint) {
 
 func run(slice *bs.BitSlice, val, max uint, done chan uint) {
 	start := val
-	val = start * start
+	val = start * (start - 1)
 	for val <= max {
 		val += start
 		if slice.Value(val) {

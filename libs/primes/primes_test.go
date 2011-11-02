@@ -1,22 +1,52 @@
 package primes
 
-import "testing"
+import (
+	"fmt"
+	"os"
+	"strconv"
+	"testing"
+)
 
 func TestPrimes(t *testing.T) {
-	var limit int = 20
-	primes := map[int]bool {
-		2: true,
-		3: true,
-		5: true,
-		7: true,
-		11: true,
-		13: true,
-		17: true,
-		19: true}
+	var limit int = 91
+
+	fmt.Println("Reading in results.")
+	file, _ := os.Open("1000.txt")
+	list := make([]uint, 0)
+	char := []byte{}
+	eof := false
+	for !eof {
+		single := []byte{0x00}
+		_, done := file.Read(single)
+		if done != nil {
+			eof = true
+		} else if string(single) == " " {
+			num, _ := strconv.Atoui(string(char))
+			list = append(list, num)
+			char = []byte{}
+		} else {
+			char = append(char, single...)
+		}
+	}
+
+	fmt.Println("Generating primes.")
 	result := Primes(uint(limit))
+
+	fmt.Println("Comparing results.")
 	for i := 0; i < limit; i++ {
-		if ! primes[i] == result.Value(uint(i)) {
+		found := false
+		for a := 0; a < len(list) && !found; a++ {
+			if list[a] == uint(i) {
+				found = true
+			}
+		}
+		if found != result.Value(uint(i)) {
 			t.Error("WRONG")
+			if found {
+				fmt.Printf("Program incorrectly reported that %v is composite.\n", i)
+			} else {
+				fmt.Printf("Program incorrectly determined that %v is prime.\n", i)
+			}
 		}
 	}
 }
