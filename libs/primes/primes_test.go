@@ -35,11 +35,10 @@ func TestPrimes(t *testing.T) {
 	fmt.Println("Comparing results.")
 	for i := 0; i < limit; i++ {
 		if list[uint(i)] != result.Value(uint(i)) {
-			t.Error("WRONG")
 			if list[uint(i)] {
-				fmt.Printf("Program incorrectly reported that %v is composite.\n", i)
+				t.Errorf("Program incorrectly reported that %v is composite.\n", i)
 			} else {
-				fmt.Printf("Program incorrectly determined that %v is prime.\n", i)
+				t.Errorf("Program incorrectly determined that %v is prime.\n", i)
 			}
 		}
 	}
@@ -47,6 +46,6 @@ func TestPrimes(t *testing.T) {
 
 func BenchmarkPrimes(b *testing.B) {
 	for i:= 0; i < b.N; i++ {
-		Primes(10000000)
+		Primes(100000)
 	}
 }
