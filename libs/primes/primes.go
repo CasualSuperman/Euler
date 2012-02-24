@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-const MAX_CONCURRENT = 15
+const MAX_CONCURRENT = 8
 
 func Primes(limit uint) *bs.BitSlice {
 	length := int(limit / 8)
@@ -43,11 +43,11 @@ var alt = false
 
 func increment(i uint) uint {
 	switch {
-		case alt:
-			i += 2
-			fallthrough
-		default:
-			i += 2
+	case alt:
+		i += 2
+		fallthrough
+	default:
+		i += 2
 	}
 	alt = !alt
 	return i
@@ -65,7 +65,7 @@ func generate(primes *bs.BitSlice, limit uint) {
 	var lastGen uint = 5
 
 	var generating = make(map[uint]bool, MAX_CONCURRENT)
-	var generated  = make(map[uint]bool)
+	var generated = make(map[uint]bool)
 	var done = make(chan uint)
 	// Loop until we reach the end.
 	for bigGPrime <= limit {
@@ -92,7 +92,7 @@ func generate(primes *bs.BitSlice, limit uint) {
 		// passing our biggest known value
 		if len(generating) >= MAX_CONCURRENT || lastGen > bigGPrime {
 			mostRecent := <-done
-			generating[mostRecent] = false, false // Remove it from the list
+			delete(generating, mostRecent) // Remove it from the list
 			generated[mostRecent] = true
 			// Find the new largest known value (This might not change)
 			if len(generating) == 0 {
@@ -102,7 +102,7 @@ func generate(primes *bs.BitSlice, limit uint) {
 						biggest = val
 					}
 				}
-				bigGPrime = uint(biggest*biggest)
+				bigGPrime = uint(biggest * biggest)
 			} else {
 				smallest := mostRecent
 				for val, _ := range generating {
@@ -111,14 +111,14 @@ func generate(primes *bs.BitSlice, limit uint) {
 						smallest = val
 					}
 				}
-				bigGPrime = uint(smallest*smallest)
+				bigGPrime = uint(smallest * smallest)
 			}
 			// fmt.Printf("New bigGPrime is %v.\n", bigGPrime)
 		}
 		// Repeat
 	}
 	for len(generating) > 0 {
-		generating[<-done] = false, false
+		delete(generating, <-done)
 	}
 }
 
@@ -128,7 +128,7 @@ func run(slice *bs.BitSlice, val, max uint, done chan uint) {
 	val = start * start
 	for val < max {
 		// fmt.Printf("Sieve of %v reached val %v.\n", start, val)
-		slice.SetValue(val, false)
+		go slice.SetValue(val, false)
 		val += start
 	}
 	done <- start

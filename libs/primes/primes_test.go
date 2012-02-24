@@ -21,7 +21,7 @@ func TestPrimes(t *testing.T) {
 		if done != nil {
 			eof = true
 		} else if string(single) == " " {
-			num, _ := strconv.Atoui(string(char))
+			num, _ := strconv.ParseUint(string(char), 10, 0)
 			list[num] = true
 			char = []byte{}
 		} else {
@@ -45,7 +45,7 @@ func TestPrimes(t *testing.T) {
 }
 
 func BenchmarkPrimes(b *testing.B) {
-	for i:= 0; i < b.N; i++ {
-		Primes(10000000)
+	for i := 0; i < b.N; i++ {
+		Primes(1000000000)
 	}
 }
